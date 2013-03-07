@@ -76,6 +76,7 @@ class MapGrinder {
 <form method="post">
     <input type="text" name="google_key" value="{$this->settings['google_key']}" size="20" />
     <input type="submit" value="Change Key" />
+    <input type="button" value="Grind Map!" id="map-grinder-button" />
 </form>
 
 
