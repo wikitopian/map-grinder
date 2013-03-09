@@ -42,6 +42,7 @@ class MapGrinder {
         add_action( 'admin_enqueue_scripts', array( &$this, 'admin_enqueue_scripts_map_grinder' ) );
         add_action( 'admin_enqueue_style',   array( &$this, 'admin_enqueue_style_map_grinder' ) );
         add_action( 'wp_dashboard_setup', array( &$this, 'wp_dashboard_setup_add_widget' ) );
+        add_action( 'wp_ajax_fetch_geo', array( &$this, 'fetch_geo' ) );
     }
     public function admin_enqueue_scripts_map_grinder( $page ) {
         wp_register_script( 'map-grinder', $this->dir.'js/map-grinder.js' );
@@ -83,6 +84,30 @@ class MapGrinder {
 <div id="map_canvas" style="width:100%; height: 200px; background-color: yellow;"></div>
 
 HTML;
+    }
+    public function fetch_geo() {
+        $geo = array(
+            'id' => 1,
+            'street' => '626 S Gospel St',
+            'city' => 'Paoli',
+            'county' => 'Orange',
+            'state' => 'IN',
+            'zip' => '47454'
+        );
+        
+        $response = array(
+            'what' => 'fetch_geo',
+            'action' => 'fetch_geo',
+            'id' => true,
+            'data' => json_encode( $geo )
+        );
+
+        $ajax = new WP_Ajax_Response( $response );
+
+        header( 'Content-Type: application/json' );
+        $ajax->send();
+
+        exit();
     }
 }
 
