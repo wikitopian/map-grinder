@@ -6,7 +6,6 @@ jQuery(document).ready(function($) {
             ajaxurl,
             {
                 action: 'fetch_geo',
-        data: 'Test'
             },
             function(response) {
                 var address = $.parseJSON(response.childNodes[0].textContent);
