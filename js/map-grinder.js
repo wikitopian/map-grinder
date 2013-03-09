@@ -9,10 +9,29 @@ jQuery(document).ready(function($) {
         data: 'Test'
             },
             function(response) {
-                var geo = $.parseJSON(response.childNodes[0].textContent);
-                console.dir(geo);
+                var address = $.parseJSON(response.childNodes[0].textContent);
+                var latlon  = geocode(address);
             }
         );
 
     });
 });
+
+function geocode(address_object) {
+    var address =
+          address_object.street
+        + ', '
+        + address_object.city
+        + ', '
+        + address_object.state
+        + ' '
+        + address_object.zip;
+
+    geocoder.geocode( { 'address': address}, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+            console.dir(results);
+        } else {
+            alert("Geocode was not successful for the following reason: " + status);
+        }
+    });
+}
