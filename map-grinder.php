@@ -19,12 +19,14 @@ class MapGrinder {
         $this->dir = plugin_dir_url( __FILE__ );
 
         register_activation_hook( __FILE__, array( &$this, 'activation' ) );
-        register_activation_hook( __FILE__, array( &$this, 'create_google_table' ) );
         register_deactivation_hook( __FILE__, array( &$this, 'deactivation' ) );
         register_uninstall_hook( __FILE__, 'map_grinder_uninstall' );
         add_action( 'admin_init', array( &$this, 'admin_init' ) );
     }
     public function activation() {
+        $this->create_input_table();
+        $this->create_google_table();
+
         if( !$this->settings = get_option( 'map-grinder' ) ) {
             $this->settings = array();
 
@@ -92,11 +94,21 @@ class MapGrinder {
 HTML;
     }
     public function fetch_geo() {
-        $geo = array(
-            'id' => 1,
-            'label' => 'XXXYYYZZZ',
-            'address' => '626 S Gospel St, Paoli, IN 47454',
-        );
+        global $wpdb;
+
+        $geo = $wpdb->get_row( "SELECT label, status, address FROM {$wpdb->prefix}map_grinder_input WHERE status = 'READY';" );
+
+        if( isset( $geo ) ) {
+            $geo = array(
+                'label' => $geo->label,
+                'status' => $geo->status,
+                'address' => $geo->address,
+            );
+        } else {
+            $geo = array(
+                'status' => 'EMPTY',
+            );
+        }
 
         $response = array(
             'what' => 'fetch_geo',
@@ -122,8 +134,7 @@ HTML;
         $geometry           = $data->geometry;
         $types              = $data->types;
         $label              = $data->label;
-
-        error_log($geometry->location->latitude);
+        $status             = $data->status;
 
         global $wpdb;
         $wpdb->insert(
@@ -170,8 +181,26 @@ HTML;
             )
         );
 
+        $wpdb->query("UPDATE {$wpdb->prefix}map_grinder_input SET status = '{$status}' WHERE label = '{$label}';");
+
 
         exit();
+    }
+    public function create_input_table() {
+        global $wpdb;
+        $prefix = $wpdb->prefix;
+        $sql = <<<SQL
+
+CREATE TABLE {$prefix}map_grinder_input (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    label VARCHAR(100),
+    status VARCHAR(25),
+    address VARCHAR(250),
+    UNIQUE KEY id (id)
+);
+
+SQL;
+        dbDelta( $sql );
     }
     public function create_google_table() {
         global $wpdb;
