@@ -125,48 +125,6 @@ HTML;
         $geometry           = $data->geometry;
         $types              = $data->types;
 
-        $address = array();
-
-        $address['types'] = $types;
-        $address['location_type'] = $geometry->location_type;
-
-        $address['street_number_long_name'] = $address_components[0]->long_name;
-        $address['street_number_short_name'] = $address_components[0]->short_name;
-
-        $address['route_long_name'] = $address_components[1]->long_name;
-        $address['route_short_name'] = $address_components[1]->short_name;
-
-        $address['locality_long_name'] = $address_components[2]->long_name;
-        $address['locality_short_name'] = $address_components[2]->short_name;
-
-        $address['administrative_area_level_3_long_name'] = $address_components[3]->long_name;
-        $address['administrative_area_level_3_short_name'] = $address_components[3]->short_name;
-
-        $address['administrative_area_level_2_long_name'] = $address_components[4]->long_name;
-        $address['administrative_area_level_2_short_name'] = $address_components[4]->short_name;
-
-        $address['administrative_area_level_1_long_name'] = $address_components[5]->long_name;
-        $address['administrative_area_level_1_short_name'] = $address_components[5]->short_name;
-
-        $address['country_long_name'] = $address_components[6]->long_name;
-        $address['country_short_name'] = $address_components[6]->short_name;
-
-        $address['postal_code_long_name'] = $address_components[7]->long_name;
-        $address['postal_code_short_name'] = $address_components[7]->short_name;
-
-        $address['formatted_address'] = $formatted_address;
-
-        $address['lat'] = $geometry->location->ib;
-        $address['lon'] = $geometry->location->jb;
-
-        $address['viewport_Z_b'] = $geometry->viewport->Z->b;
-        $address['viewport_Z_d'] = $geometry->viewport->Z->d;
-
-        $address['viewport_fa_b'] = $geometry->viewport->Z->b;
-        $address['viewport_fa_d'] = $geometry->viewport->Z->d;
-
-        update_option( 'map-grinder-temp', $address );
-
         global $wpdb;
         $wpdb->insert(
             $wpdb->prefix.'map_grinder_google',
