@@ -9,6 +9,8 @@ Author URI: http://www.swarmstrategies.com/matt
 License: GPLv2
  */
 
+require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+
 class MapGrinder {
     private $dir;
     private $settings;
@@ -17,6 +19,7 @@ class MapGrinder {
         $this->dir = plugin_dir_url( __FILE__ );
 
         register_activation_hook( __FILE__, array( &$this, 'activation' ) );
+        register_activation_hook( __FILE__, array( &$this, 'create_google_table' ) );
         register_deactivation_hook( __FILE__, array( &$this, 'deactivation' ) );
         register_uninstall_hook( __FILE__, 'map_grinder_uninstall' );
         add_action( 'admin_init', array( &$this, 'admin_init' ) );
@@ -124,38 +127,37 @@ HTML;
 
         $address = array();
 
-        $address['street_number-long_name'] = $address_components[0]->long_name;
-        $address['street_number-short_name'] = $address_components[0]->short_name;
+        $address['types'] = $types;
+        $address['location_type'] = $geometry->location_type;
 
-        $address['route-long_name'] = $address_components[1]->long_name;
-        $address['route-short_name'] = $address_components[1]->short_name;
+        $address['street_number_long_name'] = $address_components[0]->long_name;
+        $address['street_number_short_name'] = $address_components[0]->short_name;
 
-        $address['locality-long_name'] = $address_components[2]->long_name;
-        $address['locality-short_name'] = $address_components[2]->short_name;
+        $address['route_long_name'] = $address_components[1]->long_name;
+        $address['route_short_name'] = $address_components[1]->short_name;
 
-        $address['administrative_area_level_3-long_name'] = $address_components[3]->long_name;
-        $address['administrative_area_level_3-short_name'] = $address_components[3]->short_name;
+        $address['locality_long_name'] = $address_components[2]->long_name;
+        $address['locality_short_name'] = $address_components[2]->short_name;
 
-        $address['administrative_area_level_2-long_name'] = $address_components[4]->long_name;
-        $address['administrative_area_level_2-short_name'] = $address_components[4]->short_name;
+        $address['administrative_area_level_3_long_name'] = $address_components[3]->long_name;
+        $address['administrative_area_level_3_short_name'] = $address_components[3]->short_name;
 
-        $address['administrative_area_level_1-long_name'] = $address_components[5]->long_name;
-        $address['administrative_area_level_1-short_name'] = $address_components[5]->short_name;
+        $address['administrative_area_level_2_long_name'] = $address_components[4]->long_name;
+        $address['administrative_area_level_2_short_name'] = $address_components[4]->short_name;
 
-        $address['country-long_name'] = $address_components[6]->long_name;
-        $address['country-short_name'] = $address_components[6]->short_name;
+        $address['administrative_area_level_1_long_name'] = $address_components[5]->long_name;
+        $address['administrative_area_level_1_short_name'] = $address_components[5]->short_name;
 
-        $address['postal_code-long_name'] = $address_components[7]->long_name;
-        $address['postal_code-short_name'] = $address_components[7]->short_name;
+        $address['country_long_name'] = $address_components[6]->long_name;
+        $address['country_short_name'] = $address_components[6]->short_name;
+
+        $address['postal_code_long_name'] = $address_components[7]->long_name;
+        $address['postal_code_short_name'] = $address_components[7]->short_name;
 
         $address['formatted_address'] = $formatted_address;
 
-        $address['types'] = $types;
-
         $address['lat'] = $geometry->location->ib;
         $address['lon'] = $geometry->location->jb;
-
-        $address['location_type'] = $geometry->location_type;
 
         $address['viewport_Z_b'] = $geometry->viewport->Z->b;
         $address['viewport_Z_d'] = $geometry->viewport->Z->d;
@@ -165,6 +167,44 @@ HTML;
 
         update_option( 'map-grinder-temp', $address );
         exit();
+    }
+    public function create_google_table() {
+        global $wpdb;
+        $prefix = $wpdb->prefix;
+        $sql = <<<SQL
+
+CREATE TABLE {$prefix}map_grinder_google (
+    id mediumint(9) NOT NULL AUTO_INCREMENT,
+    types VARCHAR(100),
+    location_type VARCHAR(100),
+    street_number_long_name VARCHAR(100),
+    street_number_short_name VARCHAR(100),
+    route_long_name VARCHAR(100),
+    route_short_name VARCHAR(100),
+    locality_long_name VARCHAR(100),
+    locality_short_name VARCHAR(100),
+    administrative_area_level_3_long_name VARCHAR(100),
+    administrative_area_level_3_short_name VARCHAR(100),
+    administrative_area_level_2_long_name VARCHAR(100),
+    administrative_area_level_2_short_name VARCHAR(100),
+    administrative_area_level_1_long_name VARCHAR(100),
+    administrative_area_level_1_short_name VARCHAR(100),
+    country_long_name VARCHAR(100),
+    country_short_name VARCHAR(100),
+    postal_code_long_name VARCHAR(100),
+    postal_code_short_name VARCHAR(100),
+    formatted_address VARCHAR(250),
+    lat FLOAT,
+    lon FLOAT,
+    viewport_Z_b FLOAT,
+    viewport_Z_d FLOAT,
+    viewport_fa_b FLOAT,
+    viewport_fa_d FLOAT,
+    UNIQUE KEY id (id)
+);
+
+SQL;
+        dbDelta( $sql );
     }
 }
 
