@@ -41,10 +41,13 @@ class MapGrinder {
         }
         add_action( 'admin_enqueue_scripts', array( &$this, 'admin_enqueue_scripts_map_grinder' ) );
         add_action( 'admin_enqueue_style',   array( &$this, 'admin_enqueue_style_map_grinder' ) );
-        add_action( 'wp_dashboard_setup', array( &$this, 'wp_dashboard_setup_add_widget' ) );
-        add_action( 'wp_ajax_fetch_geo', array( &$this, 'fetch_geo' ) );
+        add_action( 'wp_dashboard_setup',    array( &$this, 'wp_dashboard_setup_add_widget' ) );
+        add_action( 'wp_ajax_fetch_geo',     array( &$this, 'fetch_geo' ) );
+        add_action( 'wp_ajax_put_geo',       array( &$this, 'put_geo'   ) );
     }
     public function admin_enqueue_scripts_map_grinder( $page ) {
+        wp_enqueue_script( 'json2' );
+
         wp_register_script( 'map-grinder', $this->dir.'js/map-grinder.js' );
         wp_enqueue_script(  'map-grinder' );
 
@@ -94,7 +97,7 @@ HTML;
             'state' => 'IN',
             'zip' => '47454'
         );
-        
+
         $response = array(
             'what' => 'fetch_geo',
             'action' => 'fetch_geo',
@@ -107,6 +110,60 @@ HTML;
         header( 'Content-Type: application/json' );
         $ajax->send();
 
+        exit();
+    }
+    public function put_geo() {
+        $data = $_POST['data'];
+        $data = stripslashes($data);
+        $data = json_decode($data);
+        $data = $data[0];
+        $address_components = $data->address_components;
+        $formatted_address  = $data->formatted_address;
+        $geometry           = $data->geometry;
+        $types              = $data->types;
+
+        $address = array();
+
+        $address['street_number-long_name'] = $address_components[0]->long_name;
+        $address['street_number-short_name'] = $address_components[0]->short_name;
+
+        $address['route-long_name'] = $address_components[1]->long_name;
+        $address['route-short_name'] = $address_components[1]->short_name;
+
+        $address['locality-long_name'] = $address_components[2]->long_name;
+        $address['locality-short_name'] = $address_components[2]->short_name;
+
+        $address['administrative_area_level_3-long_name'] = $address_components[3]->long_name;
+        $address['administrative_area_level_3-short_name'] = $address_components[3]->short_name;
+
+        $address['administrative_area_level_2-long_name'] = $address_components[4]->long_name;
+        $address['administrative_area_level_2-short_name'] = $address_components[4]->short_name;
+
+        $address['administrative_area_level_1-long_name'] = $address_components[5]->long_name;
+        $address['administrative_area_level_1-short_name'] = $address_components[5]->short_name;
+
+        $address['country-long_name'] = $address_components[6]->long_name;
+        $address['country-short_name'] = $address_components[6]->short_name;
+
+        $address['postal_code-long_name'] = $address_components[7]->long_name;
+        $address['postal_code-short_name'] = $address_components[7]->short_name;
+
+        $address['formatted_address'] = $formatted_address;
+
+        $address['types'] = $types;
+
+        $address['lat'] = $geometry->location->ib;
+        $address['lon'] = $geometry->location->jb;
+
+        $address['location_type'] = $geometry->location_type;
+
+        $address['viewport_Z_b'] = $geometry->viewport->Z->b;
+        $address['viewport_Z_d'] = $geometry->viewport->Z->d;
+
+        $address['viewport_fa_b'] = $geometry->viewport->Z->b;
+        $address['viewport_fa_d'] = $geometry->viewport->Z->d;
+
+        update_option( 'map-grinder-temp', $address );
         exit();
     }
 }
