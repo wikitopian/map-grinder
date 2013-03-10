@@ -94,11 +94,8 @@ HTML;
     public function fetch_geo() {
         $geo = array(
             'id' => 1,
-            'street' => '626 S Gospel St',
-            'city' => 'Paoli',
-            'county' => 'Orange',
-            'state' => 'IN',
-            'zip' => '47454'
+            'label' => 'XXXYYYZZZ',
+            'address' => '626 S Gospel St, Paoli, IN 47454',
         );
 
         $response = array(
@@ -124,12 +121,16 @@ HTML;
         $formatted_address  = $data->formatted_address;
         $geometry           = $data->geometry;
         $types              = $data->types;
+        $label              = $data->label;
+
+        error_log($geometry->location->latitude);
 
         global $wpdb;
         $wpdb->insert(
             $wpdb->prefix.'map_grinder_google',
             array(
-                'types' => $types,
+                'label' => $label,
+                'types' => $types[0],
                 'location_type' => $geometry->location_type,
 
                 'street_number_long_name' => $address_components[0]->long_name,
@@ -158,22 +159,19 @@ HTML;
 
                 'formatted_address' => $formatted_address,
 
-                'lat' => $geometry->location->ib,
-                'lon' => $geometry->location->jb,
+                'latitude' => $geometry->location->latitude,
+                'longitude' => $geometry->location->longitude,
 
-                'viewport_Z_b' => $geometry->viewport->Z->b,
-                'viewport_Z_d' => $geometry->viewport->Z->d,
+                'northeast_latitude' => $geometry->viewport->northeast_latitude,
+                'northeast_longitude' => $geometry->viewport->northeast_longitude,
 
-                'viewport_fa_b' => $geometry->viewport->Z->b,
-                'viewport_fa_d' => $geometry->viewport->Z->d
+                'southwest_latitude' => $geometry->viewport->southwest_latitude,
+                'southwest_longitude' => $geometry->viewport->southwest_longitude
             )
         );
 
 
         exit();
-    }
-    public function insert_google_table( $address ) {
-
     }
     public function create_google_table() {
         global $wpdb;
@@ -182,6 +180,7 @@ HTML;
 
 CREATE TABLE {$prefix}map_grinder_google (
     id mediumint(9) NOT NULL AUTO_INCREMENT,
+    label VARCHAR(100),
     types VARCHAR(100),
     location_type VARCHAR(100),
     street_number_long_name VARCHAR(100),
@@ -201,12 +200,12 @@ CREATE TABLE {$prefix}map_grinder_google (
     postal_code_long_name VARCHAR(100),
     postal_code_short_name VARCHAR(100),
     formatted_address VARCHAR(250),
-    lat FLOAT(9, 9),
-    lon FLOAT(9, 9),
-    viewport_Z_b FLOAT(9, 9),
-    viewport_Z_d FLOAT(9, 9),
-    viewport_fa_b FLOAT(9, 9),
-    viewport_fa_d FLOAT(9, 9),
+    latitude DOUBLE,
+    longitude DOUBLE,
+    northeast_latitude DOUBLE,
+    northeast_longitude DOUBLE,
+    southwest_latitude DOUBLE,
+    southwest_longitude DOUBLE,
     UNIQUE KEY id (id)
 );
 
