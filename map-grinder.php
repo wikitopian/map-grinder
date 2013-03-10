@@ -166,7 +166,56 @@ HTML;
         $address['viewport_fa_d'] = $geometry->viewport->Z->d;
 
         update_option( 'map-grinder-temp', $address );
+
+        global $wpdb;
+        $wpdb->insert(
+            $wpdb->prefix.'map_grinder_google',
+            array(
+                'types' => $types,
+                'location_type' => $geometry->location_type,
+
+                'street_number_long_name' => $address_components[0]->long_name,
+                'street_number_short_name' => $address_components[0]->short_name,
+
+                'route_long_name' => $address_components[1]->long_name,
+                'route_short_name' => $address_components[1]->short_name,
+
+                'locality_long_name' => $address_components[2]->long_name,
+                'locality_short_name' => $address_components[2]->short_name,
+
+                'administrative_area_level_3_long_name' => $address_components[3]->long_name,
+                'administrative_area_level_3_short_name' => $address_components[3]->short_name,
+
+                'administrative_area_level_2_long_name' => $address_components[4]->long_name,
+                'administrative_area_level_2_short_name' => $address_components[4]->short_name,
+
+                'administrative_area_level_1_long_name' => $address_components[5]->long_name,
+                'administrative_area_level_1_short_name' => $address_components[5]->short_name,
+
+                'country_long_name' => $address_components[6]->long_name,
+                'country_short_name' => $address_components[6]->short_name,
+
+                'postal_code_long_name' => $address_components[7]->long_name,
+                'postal_code_short_name' => $address_components[7]->short_name,
+
+                'formatted_address' => $formatted_address,
+
+                'lat' => $geometry->location->ib,
+                'lon' => $geometry->location->jb,
+
+                'viewport_Z_b' => $geometry->viewport->Z->b,
+                'viewport_Z_d' => $geometry->viewport->Z->d,
+
+                'viewport_fa_b' => $geometry->viewport->Z->b,
+                'viewport_fa_d' => $geometry->viewport->Z->d
+            )
+        );
+
+
         exit();
+    }
+    public function insert_google_table( $address ) {
+
     }
     public function create_google_table() {
         global $wpdb;
