@@ -243,12 +243,12 @@ CREATE TABLE {$prefix}map_grinder_google (
     postal_code_long_name VARCHAR(100),
     postal_code_short_name VARCHAR(100),
     formatted_address VARCHAR(250),
-    lat FLOAT,
-    lon FLOAT,
-    viewport_Z_b FLOAT,
-    viewport_Z_d FLOAT,
-    viewport_fa_b FLOAT,
-    viewport_fa_d FLOAT,
+    lat FLOAT(9, 9),
+    lon FLOAT(9, 9),
+    viewport_Z_b FLOAT(9, 9),
+    viewport_Z_d FLOAT(9, 9),
+    viewport_fa_b FLOAT(9, 9),
+    viewport_fa_d FLOAT(9, 9),
     UNIQUE KEY id (id)
 );
 
