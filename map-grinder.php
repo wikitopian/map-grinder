@@ -96,8 +96,8 @@ HTML;
     public function fetch_geo() {
         global $wpdb;
 
-        $geo = $wpdb->get_row( "SELECT label, status, address FROM {$wpdb->prefix}map_grinder_input WHERE status = 'READY';" );
-
+        $geo = $wpdb->get_row( "SELECT label, status, address FROM {$wpdb->prefix}map_grinder_input WHERE status = 'READY' LIMIT 1;" );
+        error_log ( $wpdb->last_query );
         if( isset( $geo ) ) {
             $geo = array(
                 'label' => $geo->label,

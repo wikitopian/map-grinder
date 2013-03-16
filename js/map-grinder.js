@@ -40,6 +40,11 @@ function geocode(label, address) {
     geocoder.geocode( { 'address': address}, function(results, status) {
         map_grinder_busy = false;
 
+        if( results[0] === undefined ) {
+            results = new Array();
+            results[0] = new Object();
+        }
+
         results[0].label = label;
         results[0].status = status;
 
@@ -60,7 +65,6 @@ function geocode(label, address) {
             map_grinder_ready = false;
         } else {
             console.log("Geocode was not successful for the following reason: " + status);
-            map_grinder_ready = false;
         }
 
         var geodata = JSON.stringify(results);
