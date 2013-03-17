@@ -97,7 +97,7 @@ HTML;
         global $wpdb;
 
         $geo = $wpdb->get_row( "SELECT label, status, address FROM {$wpdb->prefix}map_grinder_input WHERE status = 'READY' LIMIT 1;" );
-        error_log ( $wpdb->last_query );
+
         if( isset( $geo ) ) {
             $geo = array(
                 'label' => $geo->label,
@@ -136,50 +136,69 @@ HTML;
         $label              = $data->label;
         $status             = $data->status;
 
-        global $wpdb;
-        $wpdb->insert(
-            $wpdb->prefix.'map_grinder_google',
-            array(
-                'label' => $label,
-                'types' => $types[0],
-                'location_type' => $geometry->location_type,
-
-                'street_number_long_name' => $address_components[0]->long_name,
-                'street_number_short_name' => $address_components[0]->short_name,
-
-                'route_long_name' => $address_components[1]->long_name,
-                'route_short_name' => $address_components[1]->short_name,
-
-                'locality_long_name' => $address_components[2]->long_name,
-                'locality_short_name' => $address_components[2]->short_name,
-
-                'administrative_area_level_3_long_name' => $address_components[3]->long_name,
-                'administrative_area_level_3_short_name' => $address_components[3]->short_name,
-
-                'administrative_area_level_2_long_name' => $address_components[4]->long_name,
-                'administrative_area_level_2_short_name' => $address_components[4]->short_name,
-
-                'administrative_area_level_1_long_name' => $address_components[5]->long_name,
-                'administrative_area_level_1_short_name' => $address_components[5]->short_name,
-
-                'country_long_name' => $address_components[6]->long_name,
-                'country_short_name' => $address_components[6]->short_name,
-
-                'postal_code_long_name' => $address_components[7]->long_name,
-                'postal_code_short_name' => $address_components[7]->short_name,
-
-                'formatted_address' => $formatted_address,
-
-                'latitude' => $geometry->location->latitude,
-                'longitude' => $geometry->location->longitude,
-
-                'northeast_latitude' => $geometry->viewport->northeast_latitude,
-                'northeast_longitude' => $geometry->viewport->northeast_longitude,
-
-                'southwest_latitude' => $geometry->viewport->southwest_latitude,
-                'southwest_longitude' => $geometry->viewport->southwest_longitude
-            )
+        $address = array(
+            'label' => $label,
+            'types' => $types[0],
+            'location_type' => $geometry->location_type,
         );
+
+        foreach( $address_components as $a_c_key => $a_c ) {
+
+            if( strcmp( $a_c->types[0], 'street_number' ) == 0 ) {
+                $address['street_number_long_name']  = $a_c->long_name;
+                $address['street_number_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'route' ) == 0 ) {
+                $address['route_long_name']  = $a_c->long_name;
+                $address['route_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'locality' ) == 0 ) {
+                $address['locality_long_name']  = $a_c->long_name;
+                $address['locality_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'administrative_area_level_3' ) == 0 ) {
+                $address['administrative_area_level_3_long_name']  = $a_c->long_name;
+                $address['administrative_area_level_3_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'administrative_area_level_2' ) == 0 ) {
+                $address['administrative_area_level_2_long_name']  = $a_c->long_name;
+                $address['administrative_area_level_2_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'administrative_area_level_1' ) == 0 ) {
+                $address['administrative_area_level_1_long_name']  = $a_c->long_name;
+                $address['administrative_area_level_1_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'country' ) == 0 ) {
+                $address['country_long_name']  = $a_c->long_name;
+                $address['country_short_name'] = $a_c->short_name;
+            }
+
+            if( strcmp( $a_c->types[0], 'postal_code' ) == 0 ) {
+                $address['postal_code_long_name']  = $a_c->long_name;
+                $address['postal_code_short_name'] = $a_c->short_name;
+            }
+        }
+
+        $address['formatted_address'] = $formatted_address;
+
+        $address['latitude'] = $geometry->location->latitude;
+        $address['longitude'] = $geometry->location->longitude;
+
+        $address['northeast_latitude'] = $geometry->viewport->northeast_latitude;
+        $address['northeast_longitude'] = $geometry->viewport->northeast_longitude;
+
+        $address['southwest_latitude'] = $geometry->viewport->southwest_latitude;
+        $address['southwest_longitude'] = $geometry->viewport->southwest_longitude;
+
+
+        global $wpdb;
+        $wpdb->insert( $wpdb->prefix.'map_grinder_google', $address );
 
         $wpdb->query("UPDATE {$wpdb->prefix}map_grinder_input SET status = '{$status}' WHERE label = '{$label}';");
 
