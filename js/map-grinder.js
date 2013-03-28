@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
                 fetch_geo();
             }
         },
-        1000
+        3000
         );
     });
 });
@@ -40,7 +40,7 @@ function geocode(label, address) {
     geocoder.geocode( { 'address': address}, function(results, status) {
         map_grinder_busy = false;
 
-        if( results[0] === undefined ) {
+        if( results === undefined ) {
             results = new Array();
             results[0] = new Object();
         }

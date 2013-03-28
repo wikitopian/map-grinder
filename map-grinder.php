@@ -98,6 +98,8 @@ HTML;
 
         $geo = $wpdb->get_row( "SELECT label, status, address FROM {$wpdb->prefix}map_grinder_input WHERE status = 'READY' LIMIT 1;" );
 
+        $wpdb->query("UPDATE {$wpdb->prefix}map_grinder_input SET status = 'PENDING' WHERE label = '{$geo->label}';");
+
         if( isset( $geo ) ) {
             $geo = array(
                 'label' => $geo->label,
